@@ -41,7 +41,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="custom"
         options={{
           title: 'Custom',
@@ -49,7 +49,7 @@ export default function TabLayout() {
             <MaterialIcons name="dashboard-customize" size={24} color={focused ? 'blue' : 'black'} />
           ),
         }}
-      />
+      /> */}
     </Tabs>
   );
 }

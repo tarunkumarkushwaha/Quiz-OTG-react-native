@@ -1,6 +1,6 @@
 let htmlquestions = {
     time : 1 , //in minutes
-    HTML: [{
+    questions: [{
         question: "1. HTML stands for?",
         option1: "Hypertext Markup Language",
         option2: "Hyper Makeup Language",

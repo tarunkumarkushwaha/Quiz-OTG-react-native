@@ -1,6 +1,6 @@
 const wordpressquestions = {
     time: 50, //in minutes
-    wordpress: [
+    questions: [
         {
             question: "1. WordPress is a ___?",
             option1: "Content Management System",

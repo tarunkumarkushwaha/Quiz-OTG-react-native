@@ -1,4 +1,4 @@
-let javascript =
+let javascriptquestions =
 {   
     time : 10 , //in minutes
     questions: [
@@ -123,4 +123,4 @@ let javascript =
     
 }
 
-export default javascript
+export default javascriptquestions

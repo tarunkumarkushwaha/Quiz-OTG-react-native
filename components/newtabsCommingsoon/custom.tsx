@@ -2,7 +2,6 @@ import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, ScrollView ,StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DataContext } from "../_layout";
-// import ViewQuestions from './ViewQuestions'; // Assuming ViewQuestions is a separate component
 
 const custom = () => {
   const [ques, setQues] = useState('');
@@ -22,6 +21,8 @@ const custom = () => {
       console.error('Error removing previous questions:', error);
     }
   };
+
+  // AsyncStorage.setItem('questions', JSON.stringify(CustomQuestions));
 
   const addQuestionToTest = async () => {
     const newQuestion = {
@@ -68,7 +69,6 @@ const custom = () => {
           style={styles.input}
           placeholder="Enter Question"
           multiline={true}
-          onChangeText={(text) => setQues(text)}
           value={ques}
         />
         <TextInput

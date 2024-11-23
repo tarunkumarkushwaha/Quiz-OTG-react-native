@@ -1,6 +1,6 @@
-let Reactquestions = {
+let reactquestions = {
     time : 10 , //in minutes
-    React: [{
+    questions: [{
         question: "1. What is useeffect in react?",
         option1: "a react hook",
         option2: "function to set visual effects in react",
@@ -11,4 +11,4 @@ let Reactquestions = {
     }]
 }
 
-export default Reactquestions
+export default reactquestions

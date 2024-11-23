@@ -1,40 +1,87 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, Image, Platform } from "react-native";
-
 import { DataContext } from "../_layout";
-import { useContext } from "react";
-import { View, Text, Picker, Button, Alert, TextInput } from "react-native";
+import { useContext, useEffect, useState } from "react";
+import { View, Text, Button, Alert, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
-// import AddQuestions from '../components/AddQuestions';
-// import PleaseLogin from '../components/PleaseLogin';
+import { Picker } from "@react-native-picker/picker";
+import javascriptquestions from "../../questions/javascriptquestions";
+import indianGKQuestions from "../../questions/indianGKquestions";
+import Test from "@/components/Test";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Start() {
-  // const {ata,kukur} = useContext(DataContext);
-
-  // console.log(ata)
-
-  const { signIn, CustomQuestions, testSub, settestSub, setstart, setmin } =
-    useContext(DataContext);
+  const [loading, setLoading] = useState(false);
+  const {
+    signIn,
+    CustomQuestions,
+    testSub,
+    settestSub,
+    setstart,
+    start,
+    min,
+    setmin,
+    setTestQuestion,
+    TestQuestion,
+    timeover,
+    setTimeover,
+    correctresponse,
+    incorrectresponse,
+    setcorrectresponse,
+    setincorrectresponse,
+    storeData,
+  } = useContext(DataContext);
   const navigation = useNavigation();
+
+  // useEffect(() => {
+  // // testing
+  //   console.log("Updated TestQuestion:", TestQuestion);
+  // }, [TestQuestion]);
+
+  const questionModules = {
+    javascript: () => import("../../questions/javascriptquestions"),
+    react: () => import("../../questions/reactquestions"),
+    html: () => import("../../questions/htmlquestions"),
+    css: () => import("../../questions/cssquestions"),
+    indianGK: () => import("../../questions/indianGKquestions"),
+    wordpress: () => import("../../questions/wordpressquestions"),
+  };
+
+  const loadQuestions = async () => {
+    try {
+      if (questionModules[testSub]) {
+        const module = await questionModules[testSub]();
+        setTestQuestion(module.default);
+        setmin(module.default.time);
+      } else {
+        Alert.alert("Notice", `No questions found for ${testSub}`);
+      }
+    } catch (error) {
+      console.error("Error loading questions:", error);
+    }
+  };
 
   const startTest = () => {
     setstart(true);
-    Alert.alert("Notice", "Test has started");
-    // navigation.navigate("CustomTest"); // Update with your navigation path
-    // AsyncStorage.setItem('questions', JSON.stringify(CustomQuestions));
+    loadQuestions();
+    setcorrectresponse(0);
+    setincorrectresponse(0);
   };
 
-  const jsTest = () => {
-    setstart(true);
-    Alert.alert("Notice", "Test has started");
-    // navigation.navigate("Test"); // Update with your navigation path
-  };
+  useEffect(() => {
+    loadQuestions();
+  }, [testSub]);
 
-  return signIn ? (
+  return !start ? (
     <View style={styles.mainContainer}>
+      <Image
+        source={{
+          uri: "https://cdn.pixabay.com/photo/2017/02/05/04/24/question-2039124_1280.jpg",
+        }}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      />
       <Text style={styles.header}>Test Settings</Text>
-
       <View style={styles.settingsContainer}>
         <View style={styles.pickerContainer}>
           <Text style={styles.label}>Subject</Text>
@@ -43,35 +90,19 @@ export default function Start() {
             onValueChange={(value) => settestSub(value)}
             style={styles.picker}
           >
+            <Picker.Item label="General Knowlwdge" value="indianGK" />
             <Picker.Item label="HTML" value="html" />
             <Picker.Item label="CSS" value="css" />
             <Picker.Item label="JavaScript" value="javascript" />
             <Picker.Item label="React" value="react" />
             <Picker.Item label="WordPress" value="wordpress" />
-            <Picker.Item label="Previous Paper" value="Previous paper" />
-            <Picker.Item label="Your Custom Questions" value="Your Questions" />
           </Picker>
         </View>
 
         <View style={styles.buttonContainer}>
-          {testSub !== "Your Questions" && testSub !== "Previous paper" && (
-            <Button title="Start Test" onPress={jsTest} color="#4CAF50" />
-          )}
-
-          {CustomQuestions.length > 0 && testSub === "Previous paper" ? (
-            <Button title="Start Test" onPress={startTest} color="#4CAF50" />
-          ) : (
-            testSub === "Previous paper" && (
-              <Text style={styles.notAvailableText}>Not available</Text>
-            )
-          )}
-
-          {testSub === "Your Questions" && (
-            <Button title="Start Test" onPress={startTest} color="#4CAF50" />
-          )}
+          <Button title="Start Test" onPress={startTest} color="#4CAF50" />
         </View>
 
-        {/* {testSub === "Your Questions" && <AddQuestions />} */}
         <View style={styles.container}>
           <Text style={styles.title}>Test Rules</Text>
           <View style={styles.listContainer}>
@@ -103,12 +134,22 @@ export default function Start() {
       </View>
     </View>
   ) : (
-    <Text>hello</Text>
-    // <PleaseLogin />
+    TestQuestion && <Test />
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    width: "100%",
+    height: "100%",
+    opacity: 0.7,
+  },
+
   mainContainer: {
     flex: 1,
     backgroundColor: "#282c34",
@@ -117,10 +158,12 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    color: "#ffffff",
+    fontWeight: "bold",
+    // color: "#FFD700",
     textAlign: "center",
     marginVertical: 20,
   },
+
   settingsContainer: {
     backgroundColor: "#333",
     borderRadius: 10,
@@ -155,12 +198,12 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
 
-    container: {
-    backgroundColor: '#f2f2f2',
+  container: {
+    backgroundColor: "#f2f2f2",
     padding: 24,
-    marginTop :24 ,
+    marginTop: 24,
     borderRadius: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -171,13 +214,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
-    textAlign:"center",
+    textAlign: "center",
   },
   listContainer: {
     // paddingLeft: 20,
-    textAlign:"center",
+    textAlign: "center",
   },
   listItem: {
     marginBottom: 8,

@@ -1,6 +1,6 @@
-let CSSquestions = {
+let cssquestions = {
     time : 1 , //in minutes
-    CSS: [{
+    questions: [{
         question: "1. CSS means ?",
         option1: "Code Style Sheets",
         option2: "Cardcasting Style Sheets",
@@ -11,4 +11,4 @@ let CSSquestions = {
     }]
 }
 
-export default CSSquestions
+export default cssquestions

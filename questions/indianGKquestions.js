@@ -1,6 +1,6 @@
 let indianGKQuestions = {
     time: 20, // in minutes
-    GK: [{
+    questions: [{
         question: "1. Prime minister of India is ____?",
         option1: "Rahul Gandhi",
         option2: "me",
