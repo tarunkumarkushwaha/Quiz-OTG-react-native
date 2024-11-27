@@ -15,28 +15,17 @@ export default function Start() {
   const {
     signIn,
     CustomQuestions,
-    testSub,
-    settestSub,
+    setresult,
     setstart,
     start,
     min,
     setmin,
-    setTestQuestion,
-    TestQuestion,
     timeover,
     setTimeover,
-    correctresponse,
-    incorrectresponse,
-    setcorrectresponse,
-    setincorrectresponse,
     storeData,
+    result
   } = useContext(DataContext);
   const navigation = useNavigation();
-
-  // useEffect(() => {
-  // // testing
-  //   console.log("Updated TestQuestion:", TestQuestion);
-  // }, [TestQuestion]);
 
   const questionModules = {
     javascript: () => import("../../questions/javascriptquestions"),
@@ -49,12 +38,18 @@ export default function Start() {
 
   const loadQuestions = async () => {
     try {
-      if (questionModules[testSub]) {
-        const module = await questionModules[testSub]();
-        setTestQuestion(module.default);
+      if (questionModules[result.subject]) {
+        const module = await questionModules[result.subject]();
+
+        setresult((prevState) => ({
+          ...prevState,
+          TestQuestion: module.default,
+          totaltime: module.default.time,
+        }));
+
         setmin(module.default.time);
       } else {
-        Alert.alert("Notice", `No questions found for ${testSub}`);
+        Alert.alert("Notice", `No questions found for ${result.subject}`);
       }
     } catch (error) {
       console.error("Error loading questions:", error);
@@ -63,14 +58,25 @@ export default function Start() {
 
   const startTest = () => {
     setstart(true);
+    setresult((prevState) => ({
+      ...prevState,
+      correctresponse: 0,
+      incorrectresponse: 0,
+      percentage: 0,
+    }));
     loadQuestions();
-    setcorrectresponse(0);
-    setincorrectresponse(0);
+  };
+
+  const pickerHandler = (value) => {
+    setresult((prevState) => ({
+      ...prevState,
+      subject: value,
+    }));
   };
 
   useEffect(() => {
     loadQuestions();
-  }, [testSub]);
+  }, [result.TestQuestion]);
 
   return !start ? (
     <View style={styles.mainContainer}>
@@ -86,8 +92,8 @@ export default function Start() {
         <View style={styles.pickerContainer}>
           <Text style={styles.label}>Subject</Text>
           <Picker
-            selectedValue={testSub}
-            onValueChange={(value) => settestSub(value)}
+            selectedValue={result.subject}
+            onValueChange={pickerHandler}
             style={styles.picker}
           >
             <Picker.Item label="General Knowlwdge" value="indianGK" />
@@ -134,7 +140,7 @@ export default function Start() {
       </View>
     </View>
   ) : (
-    TestQuestion && <Test />
+    start && <Test />
   );
 }
 

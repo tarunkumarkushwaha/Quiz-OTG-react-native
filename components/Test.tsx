@@ -11,25 +11,14 @@ import { useNavigation } from "@react-navigation/native";
 import SingleQuestion from "../components/SingleQuestion";
 import Timer from "../components/Timer";
 import { DataContext } from "../app/_layout";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Test = () => {
   const [questionNO, setQuestionNO] = useState(0);
   const [response, setresponse] = useState("");
   const [disabled, setDisabled] = useState(false);
-  const {
-    setincorrectresponse,
-    setmin,
-    min,
-    setcorrectresponse,
-    correctresponse,
-    testSub,
-    dark,
-    signIn,
-    TestQuestion,
-    setTestQuestion,
-    setstart,
-    start,
-  } = useContext(DataContext);
+  const { setmin, min, result, setresult, signIn, setstart, start, storeData } =
+    useContext(DataContext);
 
   const navigation = useNavigation();
   const currentsong = useRef();
@@ -41,55 +30,84 @@ const Test = () => {
     "https://cdn.pixabay.com/download/audio/2021/08/04/audio_c6ccf3232f.mp3?filename=negative_beeps-6008.mp3";
 
   const checkAnsQuick = () => {
-    if (TestQuestion.questions[questionNO].correctresponse === response) {
-      setcorrectresponse((prev) => prev + 1);
+    if (
+      result.TestQuestion.questions[questionNO].correctresponse === response
+    ) {
+      setresult((prevState) => ({
+        ...prevState,
+        correctresponse: prevState.correctresponse + 1,
+      }));
+
       currentsong.current.play();
       Alert.alert("Correct", "Your answer is correct!");
     } else {
-      setincorrectresponse((prev) => prev + 1);
+      setresult((prevState) => ({
+        ...prevState,
+        incorrectresponse: prevState.incorrectresponse + 1,
+      }));
+
       currentsong2.current.play();
       Alert.alert("Incorrect", "Your answer is incorrect.");
     }
     setDisabled(true);
   };
 
-  const checkanswer = ()=>{
+  const checkanswer = () => {
     if (!disabled) {
-      if (response !== TestQuestion.questions[questionNO].correctresponse) {
-        setincorrectresponse((prev) => prev + 1);
-      } else if (
-        TestQuestion.questions[questionNO].correctresponse === response
+      if (
+        response !== result.TestQuestion.questions[questionNO].correctresponse
       ) {
-        setcorrectresponse((prev) => prev + 1);
+        setresult((prevState) => ({
+          ...prevState,
+          incorrectresponse: prevState.incorrectresponse + 1,
+          timetaken: eval(result.TestQuestion.time - min),
+        }));
+      } else if (
+        result.TestQuestion.questions[questionNO].correctresponse === response
+      ) {
+        setresult((prevState) => ({
+          ...prevState,
+          correctresponse: prevState.correctresponse + 1,
+          percentage: parseFloat(
+            eval(
+              ((result.correctresponse + 1) /
+                result.TestQuestion.questions.length) *
+                100
+            ).toFixed(2)
+          ),
+          timetaken: eval(result.TestQuestion.time - min),
+        }));
       }
     }
-  }
+  };
 
   const yourNext = () => {
-    checkanswer()
+    checkanswer();
     setDisabled(false);
     setresponse("");
-    if (questionNO < TestQuestion.questions.length - 1) {
+    if (questionNO < result.TestQuestion.questions.length - 1) {
       setQuestionNO((prev) => prev + 1);
     } else {
       Alert.alert("Last Question", "This is the last question.");
     }
   };
 
-  const finalSubmit = () => {
-    checkanswer()
+  const finalSubmit = async () => {
+    checkanswer();
+    const pastResult = await AsyncStorage.getItem("pastresult");
+    if (pastResult) {
+      storeData("pastresult", [...JSON.parse(pastResult), result]);
+    } else {
+      storeData("pastresult", [result]);
+    }
+    storeData("result", result);
     Alert.alert("Success", "Test submitted successfully");
     setstart(false);
     navigation.navigate("results");
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        dark ? styles.darkBackground : styles.lightBackground,
-      ]}
-    >
+    <View style={[styles.container, styles.lightBackground]}>
       <audio
         src={trueSound}
         loop={false}
@@ -112,10 +130,10 @@ const Test = () => {
             </TouchableOpacity>
           </>
         ) : (
-          TestQuestion && (
+          result.TestQuestion && (
             <View style={styles.questionContainer}>
               <SingleQuestion
-                question={TestQuestion.questions[questionNO]}
+                question={result.TestQuestion.questions[questionNO]}
                 disabled={disabled}
                 response={response}
                 setresponse={setresponse}

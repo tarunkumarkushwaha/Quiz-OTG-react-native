@@ -5,79 +5,24 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Result = () => {
   const [haspastresult, sethaspastresult] = useState(false);
-  const [pastresult, setpastresult] = useState({
-    correctresponse: 0,
-    incorrectresponse: 0,
-    percentage: 0,
-    subject: "",
-    timetaken: 0,
-    questionLength: 0,
-  });
+  const [dark, setdark] = useState(false);
+  const [pastresult, setpastresult] = useState([]);
   const questionLengthRef = useRef(0);
-  const percentageRef = useRef(0);
   const improvementRef = useRef(0);
 
-  const {
-    percentage,
-    setpercentage,
-    TestQuestion,
-    result,
-    setresult,
-    correctresponse,
-    incorrectresponse,
-    dark,
-    CustomQuestions,
-    testSub,
-    signIn,
-    setstart,
-    setmin,
-    storeData,
-  } = useContext(DataContext);
+  const { result, setresult, CustomQuestions, signIn, setstart, setmin } =
+    useContext(DataContext);
 
   useEffect(() => {
     const getPastResult = async () => {
       const pastResult = await AsyncStorage.getItem("pastresult");
-      if (pastResult) setpastresult(JSON.parse(pastResult));
+      if (pastResult) setpastresult(JSON.parse(pastResult)[JSON.parse(pastResult).length - 2]);
       if (pastResult) sethaspastresult(true);
     };
     getPastResult();
     setstart(false);
     setmin(10);
   }, []);
-
-  questionLengthRef.current =
-    testSub !== "Your Questions"
-      ? TestQuestion
-        ? TestQuestion.questions.length
-        : 1
-      : CustomQuestions
-      ? CustomQuestions.length
-      : 1;
-
-  percentageRef.current = (correctresponse / questionLengthRef.current) * 100;
-  
-  useEffect(() => {
-    questionLength =
-      testSub !== "Your Questions"
-        ? TestQuestion
-          ? TestQuestion.questions.length
-          : 1
-        : CustomQuestions
-        ? CustomQuestions.length
-        : 1;
-    let per = (correctresponse / questionLength) * 100;
-    let perRounded = Number(
-      Math.round(per.current + "e2") + "e-2"
-    )
-
-    setpercentage(perRounded);
-
-  }, [correctresponse, incorrectresponse, percentage]);
-
-  console.log(Number(
-    Math.round(percentageRef.current + "e2") + "e-2"
-  ) , pastresult.percentage
-)
 
   return (
     <View style={[styles.container]}>
@@ -98,36 +43,36 @@ const Result = () => {
               style={[styles.resultText, { color: !dark ? "#ffffff" : "#333" }]}
             >
               Correct Responses:{" "}
-              <Text style={styles.value}>{correctresponse}</Text>
+              <Text style={styles.value}>{result.correctresponse}</Text>
             </Text>
             <Text
               style={[styles.resultText, { color: !dark ? "#ffffff" : "#333" }]}
             >
               Incorrect Responses:{" "}
-              <Text style={styles.value}>{incorrectresponse}</Text>
+              <Text style={styles.value}>{result.incorrectresponse}</Text>
             </Text>
             <Text
               style={[styles.resultText, { color: !dark ? "#ffffff" : "#333" }]}
             >
               Unattempted Questions:{" "}
               <Text style={styles.value}>
-                {questionLengthRef.current -
-                  (incorrectresponse + correctresponse)}
+                {result.TestQuestion.questions.length -
+                  (result.incorrectresponse + result.correctresponse)}
               </Text>
             </Text>
             <Text
               style={[styles.resultText, { color: !dark ? "#ffffff" : "#333" }]}
             >
               Total Questions:{" "}
-              <Text style={styles.value}>{questionLengthRef.current}</Text>
+              <Text style={styles.value}>
+                {result.TestQuestion.questions.length}
+              </Text>
             </Text>
             <Text
               style={[styles.resultText, { color: !dark ? "#ffffff" : "#333" }]}
             >
               Percentage:{" "}
-              <Text style={styles.value}>
-                {Number(Math.round(percentageRef.current + "e2") + "e-2")} %
-              </Text>
+              <Text style={styles.value}>{result.percentage} %</Text>
             </Text>
 
             <Text style={styles.resultTitleText}>Past Results</Text>
@@ -153,7 +98,16 @@ const Result = () => {
                   Percentage:{" "}
                   <Text style={styles.value}>{pastresult.percentage} %</Text>
                 </Text>
-                {testSub == pastresult.subject && (
+                <Text
+                  style={[
+                    styles.resultText,
+                    { color: !dark ? "#ffffff" : "#333" },
+                  ]}
+                >
+                  Time taken:{" "}
+                  <Text style={styles.value}>{pastresult.timetaken} min</Text>
+                </Text>
+                {result.subject == pastresult.subject && (
                   <Text
                     style={[
                       styles.resultText,
@@ -162,12 +116,7 @@ const Result = () => {
                   >
                     Improvement:{" "}
                     <Text style={styles.value}>
-                      {eval(
-                        Number(
-                          Math.round(percentageRef.current + "e2") + "e-2"
-                        ) - pastresult.percentage
-                      )}{" "}
-                      %
+                      {eval(result.percentage - pastresult.percentage)} %
                     </Text>
                   </Text>
                 )}
