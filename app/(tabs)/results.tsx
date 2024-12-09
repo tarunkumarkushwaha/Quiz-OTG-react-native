@@ -2,27 +2,44 @@ import React, { useEffect, useRef, useContext, useState } from "react";
 import { Image, View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { DataContext } from "../_layout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Result = () => {
   const [haspastresult, sethaspastresult] = useState(false);
   const [dark, setdark] = useState(false);
-  const [pastresult, setpastresult] = useState([]);
+  const [pastresult, setpastresult] = useState({});
   const questionLengthRef = useRef(0);
   const improvementRef = useRef(0);
 
-  const { result, setresult, CustomQuestions, signIn, setstart, setmin } =
-    useContext(DataContext);
+  const {
+    result,
+    setresult,
+    CustomQuestions,
+    signIn,
+    setstart,
+    storeData,
+  } = useContext(DataContext);
 
-  useEffect(() => {
-    const getPastResult = async () => {
-      const pastResult = await AsyncStorage.getItem("pastresult");
-      if (pastResult) setpastresult(JSON.parse(pastResult)[JSON.parse(pastResult).length - 2]);
-      if (pastResult) sethaspastresult(true);
-    };
-    getPastResult();
-    setstart(false);
-    setmin(10);
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      const getPastResult = async () => {
+        const pastResult = await AsyncStorage.getItem("pastresult");
+        if (pastResult) setpastresult(JSON.parse(pastResult));
+        if (pastResult) sethaspastresult(true);
+      };
+      getPastResult();
+
+      if (result.TestQuestion.questions.length >= 1) {
+        storeData("result", result);
+        setstart(false);
+      }
+
+      return () => {
+        result.TestQuestion.questions.length >= 1 &&
+          storeData("pastresult", result);
+      };
+    }, [])
+  );
 
   return (
     <View style={[styles.container]}>
@@ -34,100 +51,215 @@ const Result = () => {
         resizeMode="cover"
       />
       {signIn ? (
-        <View style={styles.contentContainer}>
-          <Text style={[styles.title, { color: !dark ? "#333" : "#333" }]}>
-            Result of {result.subject} quiz
-          </Text>
-          <View style={styles.resultBox}>
-            <Text
-              style={[styles.resultText, { color: !dark ? "#ffffff" : "#333" }]}
-            >
-              Correct Responses:{" "}
-              <Text style={styles.value}>{result.correctresponse}</Text>
+        result.TestQuestion.questions.length >= 1 ? (
+          <View style={styles.contentContainer}>
+            <Text style={[styles.title, { color: !dark ? "#333" : "#333" }]}>
+              Result of {result.subject} quiz
             </Text>
-            <Text
-              style={[styles.resultText, { color: !dark ? "#ffffff" : "#333" }]}
-            >
-              Incorrect Responses:{" "}
-              <Text style={styles.value}>{result.incorrectresponse}</Text>
-            </Text>
-            <Text
-              style={[styles.resultText, { color: !dark ? "#ffffff" : "#333" }]}
-            >
-              Unattempted Questions:{" "}
-              <Text style={styles.value}>
-                {result.TestQuestion.questions.length -
-                  (result.incorrectresponse + result.correctresponse)}
+            <View style={styles.resultBox}>
+              <Text
+                style={[
+                  styles.resultText,
+                  { color: !dark ? "#ffffff" : "#333" },
+                ]}
+              >
+                Correct Responses:{" "}
+                <Text style={styles.value}>{result.correctresponse}</Text>
               </Text>
-            </Text>
-            <Text
-              style={[styles.resultText, { color: !dark ? "#ffffff" : "#333" }]}
-            >
-              Total Questions:{" "}
-              <Text style={styles.value}>
-                {result.TestQuestion.questions.length}
+              <Text
+                style={[
+                  styles.resultText,
+                  { color: !dark ? "#ffffff" : "#333" },
+                ]}
+              >
+                Incorrect Responses:{" "}
+                <Text style={styles.value}>{result.incorrectresponse}</Text>
               </Text>
-            </Text>
-            <Text
-              style={[styles.resultText, { color: !dark ? "#ffffff" : "#333" }]}
-            >
-              Percentage:{" "}
-              <Text style={styles.value}>{result.percentage} %</Text>
-            </Text>
+              <Text
+                style={[
+                  styles.resultText,
+                  { color: !dark ? "#ffffff" : "#333" },
+                ]}
+              >
+                Unattempted Questions:{" "}
+                <Text style={styles.value}>
+                  {result.TestQuestion.questions.length -
+                    (result.incorrectresponse + result.correctresponse)}
+                </Text>
+              </Text>
+              <Text
+                style={[
+                  styles.resultText,
+                  { color: !dark ? "#ffffff" : "#333" },
+                ]}
+              >
+                Total Questions:{" "}
+                <Text style={styles.value}>
+                  {result.TestQuestion.questions.length}
+                </Text>
+              </Text>
+              <Text
+                style={[
+                  styles.resultText,
+                  { color: !dark ? "#ffffff" : "#333" },
+                ]}
+              >
+                Percentage:{" "}
+                <Text style={styles.value}>
+                  {parseFloat(
+                    eval(
+                      (result.correctresponse /
+                        result.TestQuestion.questions.length) *
+                        100
+                    ).toFixed(2)
+                  )}{" "}
+                  %
+                </Text>
+              </Text>
 
-            <Text style={styles.resultTitleText}>Past Results</Text>
+              <Text
+                style={[
+                  styles.resultText,
+                  { color: !dark ? "#ffffff" : "#333" },
+                ]}
+              >
+                Time Left :{" "}
+                <Text style={styles.value}>
+                  {`${result.timeLeft.min} min : ${
+                    result.timeLeft.sec == 0 ? "00" : result.timeLeft.sec
+                  } sec`}
+                </Text>
+              </Text>
+              <Text
+                style={[
+                  styles.resultText,
+                  { color: !dark ? "#ffffff" : "#333" },
+                ]}
+              >
+                Time Taken :{" "}
+                <Text style={styles.value}>
+                  {`${result.timeTaken.min} min : ${
+                    result.timeTaken.sec == 0 ? "00" : result.timeTaken.sec
+                  } sec`}
+                </Text>
+              </Text>
 
-            {haspastresult ? (
-              <>
-                {" "}
-                <Text
-                  style={[
-                    styles.resultText,
-                    { color: !dark ? "#ffffff" : "#333" },
-                  ]}
-                >
-                  Test subject:{" "}
-                  <Text style={styles.value}>{pastresult.subject}</Text>
-                </Text>
-                <Text
-                  style={[
-                    styles.resultText,
-                    { color: !dark ? "#ffffff" : "#333" },
-                  ]}
-                >
-                  Percentage:{" "}
-                  <Text style={styles.value}>{pastresult.percentage} %</Text>
-                </Text>
-                <Text
-                  style={[
-                    styles.resultText,
-                    { color: !dark ? "#ffffff" : "#333" },
-                  ]}
-                >
-                  Time taken:{" "}
-                  <Text style={styles.value}>{pastresult.timetaken} min</Text>
-                </Text>
-                {result.subject == pastresult.subject && (
+              <Text style={styles.resultTitleText}>Past Results</Text>
+
+              {haspastresult ? (
+                <>
+                  {" "}
                   <Text
                     style={[
                       styles.resultText,
                       { color: !dark ? "#ffffff" : "#333" },
                     ]}
                   >
-                    Improvement:{" "}
+                    Test subject:{" "}
+                    <Text style={styles.value}>{pastresult.subject}</Text>
+                  </Text>
+                  <Text
+                    style={[
+                      styles.resultText,
+                      { color: !dark ? "#ffffff" : "#333" },
+                    ]}
+                  >
+                    Percentage:{" "}
                     <Text style={styles.value}>
-                      {eval(result.percentage - pastresult.percentage)} %
+                      {parseFloat(
+                        eval(
+                          (pastresult.correctresponse /
+                            pastresult.TestQuestion.questions.length) *
+                            100
+                        ).toFixed(2)
+                      )}{" "}
+                      %
                     </Text>
                   </Text>
-                )}
-              </>
-            ) : (
-              <Text style={{ color: !dark ? "#ffffff" : "#333" }}>
-                no past results
-              </Text>
-            )}
+                  <Text
+                    style={[
+                      styles.resultText,
+                      { color: !dark ? "#ffffff" : "#333" },
+                    ]}
+                  >
+                    Time taken:{" "}
+                    <Text style={styles.value}>
+                      {`${pastresult.timeLeft.min} min : ${
+                        result.timeLeft.sec == 0 ? "00" : result.timeLeft.sec
+                      }`}{" sec"}
+                      
+                    </Text>
+                  </Text>
+                  {result.subject == pastresult.subject && (
+                    <Text
+                    style={[
+                      styles.resultText,
+                      { color: !dark ? "#ffffff" : "#333" },
+                    ]}
+                  >
+                    {(() => {
+                      if (
+                        result?.TestQuestion?.questions?.length &&
+                        pastresult?.TestQuestion?.questions?.length
+                      ) {
+                        const currentPercentage =
+                          (result.correctresponse / result.TestQuestion.questions.length) * 100;
+                  
+                        const pastPercentage =
+                          (pastresult.correctresponse / pastresult.TestQuestion.questions.length) * 100;
+                  
+                        const improvement = (currentPercentage - pastPercentage).toFixed(2);
+                  
+                        if (improvement > 0) {
+                          return (
+                            <Text>
+                              Improvement: <Text style={styles.value}>{`${improvement}%`}</Text>
+                            </Text>
+                          );
+                        } else if (improvement < 0) {
+                          return (
+                            <Text>
+                              Demotion: <Text style={styles.value}>{`${Math.abs(improvement)}%`}</Text>
+                            </Text>
+                          );
+                        } else {
+                          return (
+                            <Text>
+                              No Change: <Text style={styles.value}>0.00%</Text>
+                            </Text>
+                          );
+                        }
+                      } else {
+                        return (
+                          <Text>
+                            Improvement Not Available
+                          </Text>
+                        );
+                      }
+                    })()}
+                  </Text>
+                  
+                  )}
+                </>
+              ) : (
+                <Text style={{ color: !dark ? "#ffffff" : "#333" }}>
+                  no past results
+                </Text>
+              )}
+            </View>
           </View>
-        </View>
+        ) : (
+          <View style={styles.contentContainer}>
+            <View style={styles.resultBox}>
+              <Text
+                style={[styles.title, { color: !dark ? "#ffffff" : "#333" }]}
+              >
+                No current results
+              </Text>
+              
+            </View>
+          </View>
+        )
       ) : (
         <View style={styles.contentContainer}>
           <Text style={[styles.title, { color: !dark ? "#ffffff" : "#333" }]}>

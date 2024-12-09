@@ -4,7 +4,13 @@ import {
   ThemeProvider,
   ActivityIndicator,
 } from "@react-navigation/native";
-import React, { createContext, useState, ReactNode, useContext } from "react";
+import React, {
+  createContext,
+  useState,
+  ReactNode,
+  useContext,
+  useRef,
+} from "react";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -20,22 +26,20 @@ export const DataContext = createContext();
 
 export default function RootLayout() {
   const [isLoading, setIsLoading] = useState(true);
-  const [min, setmin] = useState(10);
   const [signIn, setsignIn] = useState(true);
   const [result, setresult] = useState({
     TestQuestion: {
-        time: 1, // in minutes
-        questions: [
-            // ... question details
-        ],
+      time: 1, // in minutes
+      questions: [
+        // ... question
+      ],
     },
     correctresponse: 0,
     incorrectresponse: 0,
-    percentage: 0,
     subject: "indianGK",
-    totaltime: 0,
-    timetaken: 0,
-});
+    timeLeft: { min: 0, sec: 0 },
+    timeTaken: { min: 0, sec: 0 },
+  });
   const [CustomQuestions, setCustomQuestions] = useState([]);
   const [start, setstart] = useState(false);
   const [timeover, setTimeover] = useState(false);
@@ -78,7 +82,7 @@ export default function RootLayout() {
     !isLoading && saveResult();
   }, [result]);
 
-  console.log(result);
+  // console.log(result);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
@@ -88,8 +92,6 @@ export default function RootLayout() {
           setIsLoading,
           start,
           setstart,
-          min,
-          setmin,
           timeover,
           setTimeover,
           signIn,
@@ -98,7 +100,7 @@ export default function RootLayout() {
           setCustomQuestions,
           result,
           setresult,
-          storeData
+          storeData,
         }}
       >
         <Stack>

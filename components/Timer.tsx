@@ -1,38 +1,45 @@
-import React, { useContext, useEffect, useState} from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { DataContext } from "../app/_layout";
 
-const Timer = ({ finalSubmit }) => {
-  const [sec, setsec] = useState(0);
-  const { start, setstart, min, setmin } = useContext(DataContext);
-
-  const timer = () => {
-    if (start) {
-      if (sec > 0) {
-        setsec(sec - 1);
-      } else {
-        if (min > 0) {
-          setmin(min - 1);
-          setsec(59);
-        }
-      }
-    }
-  };
+const Timer = ({ finalSubmit, remainingTime, setRemainingTime }) => {
+  const { start, setstart, result } = useContext(DataContext);
 
   useEffect(() => {
-    const timerInterval = setInterval(timer, 1000);
-    if (min === 0 && sec === 0) {
-      clearInterval(timerInterval);
-      finalSubmit();
+    if (start) {
+      const totalSeconds = (result.TestQuestion.time || 0) * 60;
+      setRemainingTime(totalSeconds);
     }
+  }, [start, result.TestQuestion.time]);
+
+  useEffect(() => {
+    if (!start || remainingTime <= 0) return;
+
+    const timerInterval = setInterval(() => {
+      setRemainingTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerInterval);
+          setstart(false);
+          finalSubmit(remainingTime);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
     return () => clearInterval(timerInterval);
-  }, [sec, min]);
+  }, [start, remainingTime]);
+
+  const minutes = Math.floor(remainingTime / 60);
+  const seconds = remainingTime % 60;
 
   return (
     <View style={styles.timerContainer}>
-      <Text style={styles.timeText}>{min}</Text>
+      <Text style={styles.timeText}>{minutes}</Text>
       <Text style={styles.separator}>:</Text>
-      <Text style={styles.timeText}>{sec < 10 ? `0${sec}` : sec}</Text>
+      <Text style={styles.timeText}>
+        {seconds < 10 ? `0${seconds}` : seconds}
+      </Text>
     </View>
   );
 };

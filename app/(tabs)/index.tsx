@@ -30,15 +30,6 @@ export default function HomeScreen() {
     navigation.navigate("start");
   };
 
-  // useEffect(() => {
-  //   const timer = setTimeout(() => setIsLoading(false), 1000);
-  //   return () => clearTimeout(timer);
-  // }, []);
-
-  // if (isLoading) {
-  //   return <LoadingScreen />;
-  // }
-
   return (
     <View style={styles.mainContainer}>
       <Image

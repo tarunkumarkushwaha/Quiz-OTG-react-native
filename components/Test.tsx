@@ -17,7 +17,8 @@ const Test = () => {
   const [questionNO, setQuestionNO] = useState(0);
   const [response, setresponse] = useState("");
   const [disabled, setDisabled] = useState(false);
-  const { setmin, min, result, setresult, signIn, setstart, start, storeData } =
+  const [remainingTime, setRemainingTime] = useState(0); 
+  const { result, setresult, signIn, setstart, start } =
     useContext(DataContext);
 
   const navigation = useNavigation();
@@ -52,35 +53,6 @@ const Test = () => {
     setDisabled(true);
   };
 
-  const checkanswer = () => {
-    if (!disabled) {
-      if (
-        response !== result.TestQuestion.questions[questionNO].correctresponse
-      ) {
-        setresult((prevState) => ({
-          ...prevState,
-          incorrectresponse: prevState.incorrectresponse + 1,
-          timetaken: eval(result.TestQuestion.time - min),
-        }));
-      } else if (
-        result.TestQuestion.questions[questionNO].correctresponse === response
-      ) {
-        setresult((prevState) => ({
-          ...prevState,
-          correctresponse: prevState.correctresponse + 1,
-          percentage: parseFloat(
-            eval(
-              ((result.correctresponse + 1) /
-                result.TestQuestion.questions.length) *
-                100
-            ).toFixed(2)
-          ),
-          timetaken: eval(result.TestQuestion.time - min),
-        }));
-      }
-    }
-  };
-
   const yourNext = () => {
     checkanswer();
     setDisabled(false);
@@ -92,15 +64,49 @@ const Test = () => {
     }
   };
 
-  const finalSubmit = async () => {
-    checkanswer();
-    const pastResult = await AsyncStorage.getItem("pastresult");
-    if (pastResult) {
-      storeData("pastresult", [...JSON.parse(pastResult), result]);
-    } else {
-      storeData("pastresult", [result]);
+  const checkanswer = () => {
+    // console.log("ans check");
+    if (!disabled) {
+      const isCorrect =
+        response === result.TestQuestion.questions[questionNO].correctresponse;
+
+      setresult((prevState) => ({
+        ...prevState,
+        correctresponse: isCorrect
+          ? prevState.correctresponse + 1
+          : prevState.correctresponse,
+        incorrectresponse: !isCorrect
+          ? prevState.incorrectresponse + 1
+          : prevState.incorrectresponse,
+      }));
     }
-    storeData("result", result);
+  };
+
+  const updateTimeLeft = (remainingTime) => {
+    // console.log("update time");
+    
+    const totalTime = result.TestQuestion.time * 60; 
+    const elapsedTimeInSeconds = totalTime - remainingTime;
+  
+    setresult((prevState) => ({
+      ...prevState,
+      timeLeft: {
+        min: Math.floor(remainingTime / 60), 
+        sec: remainingTime % 60,
+      },
+      timeTaken: {
+        min: Math.floor(elapsedTimeInSeconds / 60), 
+        sec: elapsedTimeInSeconds % 60,
+      },
+    }));
+  };  
+
+  const finalSubmit = (remainingTime) => {
+  
+    checkanswer();
+
+    updateTimeLeft(remainingTime);
+
     Alert.alert("Success", "Test submitted successfully");
     setstart(false);
     navigation.navigate("results");
@@ -120,37 +126,31 @@ const Test = () => {
         ref={currentsong2}
         crossOrigin={"anonymous"}
       ></audio>
-      <Timer finalSubmit={finalSubmit} />
+      <Timer finalSubmit={finalSubmit} setRemainingTime={setRemainingTime} remainingTime={remainingTime} />
       {signIn ? (
-        !start ? (
-          <>
-            <Text>test over</Text>
-            <TouchableOpacity onPress={finalSubmit} style={styles.button}>
-              <Text style={styles.buttonText}>Final Submit</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          result.TestQuestion && (
-            <View style={styles.questionContainer}>
-              <SingleQuestion
-                question={result.TestQuestion.questions[questionNO]}
-                disabled={disabled}
-                response={response}
-                setresponse={setresponse}
-              />
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={yourNext} style={styles.button}>
-                  <Text style={styles.buttonText}>Next</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={checkAnsQuick} style={styles.button}>
-                  <Text style={styles.buttonText}>Check</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={finalSubmit} style={styles.button}>
-                  <Text style={styles.buttonText}>Final Submit</Text>
-                </TouchableOpacity>
-              </View>
+        result.TestQuestion && (
+          <View style={styles.questionContainer}>
+            <SingleQuestion
+              question={result.TestQuestion.questions[questionNO]}
+              disabled={disabled}
+              response={response}
+              setresponse={setresponse}
+            />
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity onPress={yourNext} style={styles.button}>
+                <Text style={styles.buttonText}>Next</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={checkAnsQuick} style={styles.button}>
+                <Text style={styles.buttonText}>Check</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => finalSubmit(remainingTime)}
+                style={styles.button}
+              >
+                <Text style={styles.buttonText}>Final Submit</Text>
+              </TouchableOpacity>
             </View>
-          )
+          </View>
         )
       ) : (
         <View style={styles.loginPrompt}>

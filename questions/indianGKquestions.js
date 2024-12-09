@@ -1,5 +1,5 @@
 let indianGKQuestions = {
-    time: 20, // in minutes
+    time: 30, // in minutes
     questions: [{
         question: "1. Prime minister of India is ____?",
         option1: "Rahul Gandhi",
@@ -216,6 +216,7 @@ let indianGKQuestions = {
         correctresponse: "Kathmandu",
         time: 1
     },
+
     {
         question: "25. Mount Everest, the world's highest mountain peak, is located in which country?",
         option1: "India",
@@ -224,52 +225,52 @@ let indianGKQuestions = {
         option4: "Bhutan",
         correctresponse: "Nepal",
         time: 1
-    },
-    {
-        question: "26. Which is the national flower of Nepal?",
-        option1: "Lotus",
-        option2: "Rhododendron",
-        option3: "Rose",
-        option4: "Lily",
-        correctresponse: "Rhododendron",
+      },
+      {
+        question: "26. Which planet is known as the morning star or evening star?",
+        option1: "Mars",
+        option2: "Venus",
+        option3: "Mercury",
+        option4: "Jupiter",
+        correctresponse: "Venus",
         time: 1
-    },
-    {
-        question: "27. Who was the first President of Nepal?",
-        option1: "Ram Baran Yadav",
-        option2: "Bidhya Devi Bhandari",
-        option3: "Birendra Bir Bikram Shah",
-        option4: "King Tribhuvan",
-        correctresponse: "Ram Baran Yadav",
+      },
+      {
+        question: "27. Who is the author of the Harry Potter book series?",
+        option1: "J.K. Rowling",
+        option2: "Stephen King",
+        option3: "Dan Brown",
+        option4: "Terry Pratchett",
+        correctresponse: "J.K. Rowling",
         time: 1
-    },
-    {
-        question: "28. Which festival is known as the 'Festival of Lights' in Nepal?",
-        option1: "Diwali",
-        option2: "Tihar",
-        option3: "Holi",
-        option4: "Dashain",
-        correctresponse: "Tihar",
+      },
+      {
+        question: "28. What is the largest desert in the world?",
+        option1: "Sahara Desert",
+        option2: "Gobi Desert",
+        option3: "Arabian Desert",
+        option4: "Kalahari Desert",
+        correctresponse: "Sahara Desert",
         time: 1
-    },
-    {
-        question: "29. What is the currency of Nepal?",
-        option1: "Rupee",
-        option2: "Taka",
-        option3: "Rupiah",
-        option4: "Yen",
-        correctresponse: "Rupee",
+      },
+      {
+        question: "29. Which animal is known as the 'Ship of the Desert'?",
+        option1: "Camel",
+        option2: "Horse",
+        option3: "Donkey",
+        option4: "Dromedary",
+        correctresponse: "Camel",
         time: 1
-    },
-    {
-        question: "30. Which animal is the national symbol of Nepal?",
-        option1: "Cow",
-        option2: "Tiger",
-        option3: "Elephant",
-        option4: "Cow",
-        correctresponse: "Cow",
+      },
+      {
+        question: "30. What is the national bird of the United States?",
+        option1: "Eagle",
+        option2: "Bald Eagle",
+        option3: "Hawk",
+        option4: "Falcon",
+        correctresponse: "Bald Eagle",
         time: 1
-    }
+      }
     ]
 }
 

@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, Image, Platform } from "react-native";
 import { DataContext } from "../_layout";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, Button, Alert, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
@@ -9,21 +9,21 @@ import javascriptquestions from "../../questions/javascriptquestions";
 import indianGKQuestions from "../../questions/indianGKquestions";
 import Test from "@/components/Test";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Start() {
   const [loading, setLoading] = useState(false);
+
   const {
     signIn,
     CustomQuestions,
     setresult,
     setstart,
     start,
-    min,
-    setmin,
     timeover,
     setTimeover,
     storeData,
-    result
+    result,
   } = useContext(DataContext);
   const navigation = useNavigation();
 
@@ -34,6 +34,10 @@ export default function Start() {
     css: () => import("../../questions/cssquestions"),
     indianGK: () => import("../../questions/indianGKquestions"),
     wordpress: () => import("../../questions/wordpressquestions"),
+    math: () => import("../../questions/mathquestions"),
+    python: () => import("../../questions/pythonquestions"),
+    science: () => import("../../questions/sciencequestions"),
+    reasoning: () => import("../../questions/reasoningquestions"),
   };
 
   const loadQuestions = async () => {
@@ -44,10 +48,7 @@ export default function Start() {
         setresult((prevState) => ({
           ...prevState,
           TestQuestion: module.default,
-          totaltime: module.default.time,
         }));
-
-        setmin(module.default.time);
       } else {
         Alert.alert("Notice", `No questions found for ${result.subject}`);
       }
@@ -62,7 +63,6 @@ export default function Start() {
       ...prevState,
       correctresponse: 0,
       incorrectresponse: 0,
-      percentage: 0,
     }));
     loadQuestions();
   };
@@ -76,7 +76,13 @@ export default function Start() {
 
   useEffect(() => {
     loadQuestions();
-  }, [result.TestQuestion]);
+  }, [result.subject]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadQuestions();
+    }, [])
+  );
 
   return !start ? (
     <View style={styles.mainContainer}>
@@ -97,6 +103,10 @@ export default function Start() {
             style={styles.picker}
           >
             <Picker.Item label="General Knowlwdge" value="indianGK" />
+            <Picker.Item label="Math" value="math" />
+            <Picker.Item label="Python" value="python" />
+            <Picker.Item label="Science" value="science" />
+            <Picker.Item label="Reasoning" value="reasoning" />
             <Picker.Item label="HTML" value="html" />
             <Picker.Item label="CSS" value="css" />
             <Picker.Item label="JavaScript" value="javascript" />
