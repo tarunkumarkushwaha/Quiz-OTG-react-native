@@ -4,7 +4,7 @@
     "slug": "Quiz-OTG",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/quizotgappicon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -24,7 +24,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/quizotgappicon.png"
     },
     "plugins": [
       "expo-router"
